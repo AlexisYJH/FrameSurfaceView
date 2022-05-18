@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class FrameSurfaceView extends BaseSurfaceView{
     private static final String DECODE_THREAD_NAME = "DecodingThread";
-    private static final int BUFFER_SIZE = 3;
+    private static final int BUFFER_SIZE = 2;
     private static final int INITIAL_INDEX = -1;
     private static final int START_INDEX = 0;
     public static final int INFINITE = -1;
@@ -169,10 +169,24 @@ public class FrameSurfaceView extends BaseSurfaceView{
     private void destroy() {
         //super.destroy();
         if (mDecodedBitmaps != null) {
-            mDecodedBitmaps.clear();
+            while(!mDecodedBitmaps.isEmpty()) {
+                try {
+                    Bitmap bitmap = mDecodedBitmaps.take();
+                    bitmap.recycle();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         if (mDrawnBitmaps != null) {
-            mDrawnBitmaps.clear();
+            while(!mDrawnBitmaps.isEmpty()) {
+                try {
+                    Bitmap bitmap = mDrawnBitmaps.take();
+                    bitmap.recycle();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         if (mDecodeThread != null) {
             mDecodeThread.quit();
